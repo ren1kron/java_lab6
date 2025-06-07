@@ -1,7 +1,9 @@
 package com.vera.server.network;
 
+import com.vera.common.cli.CommandLineReader;
 import com.vera.common.dto.CommandRequest;
 import com.vera.common.dto.CommandResponse;
+import com.vera.server.collectionManagement.CollectionManager;
 import com.vera.server.commands.Command;
 import com.vera.server.commands.CommandManager;
 import lombok.extern.java.Log;
@@ -20,10 +22,12 @@ public class TcpServerManager {
     private Selector selector;
 
     private final CommandManager commandManager;
+    private final CollectionManager collectionManager;
 
-    public TcpServerManager(InetSocketAddress address, CommandManager commandManager) {
+    public TcpServerManager(InetSocketAddress address, CommandManager commandManager, CollectionManager collectionManager) {
         this.address = address;
         this.commandManager = commandManager;
+        this.collectionManager = collectionManager;
     }
 
     public void start() throws IOException {
@@ -38,8 +42,33 @@ public class TcpServerManager {
 
         log.info("[Server] ожидаем подключений...");
 
+        BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
+
         while (true) {
-            selector.select();
+            // Мы не можем использовать многопоточку, поэтому мы в одном цикле считываем команды, которые поступают
+            // в консоль сервера и обрабатываем запросы от клиентов
+
+            // пытаемся прочитать команду из консоли
+            if (console.ready()) {
+                String input = console.readLine().trim();
+
+                if (input.equals("save")) {
+                    collectionManager.save();
+                    log.info("Коллекция успешно сохранена");
+                } else if (input.equals("exit")) {
+                    log.info("Завершаем работу сервера...");
+                    socketChannel.close();
+                    selector.close();
+                    System.exit(1);
+                } else if (input.isEmpty()) {
+                    continue;
+                } else {
+                    log.warning("Введённая команда не поддерживается сервером. На сервере можно выполнить команды: 'exit', 'save'");
+                }
+            }
+
+            // принимаем запрос клиента
+            selector.select(1);
 
             Iterator<SelectionKey> it = selector.selectedKeys().iterator();
             while (it.hasNext()) {
@@ -122,10 +151,15 @@ public class TcpServerManager {
 
         Command command = commandManager.getCommand(request.commandName());
 
-        if (commandManager.getCommand(request.commandName()) == null)
-            response = new CommandResponse(false, "Данная команда не существует");
-        else
-            response = command.execute(request.payload(), request.args());
+        if (commandManager.getCommand(request.commandName()) == null) {
+            response = new CommandResponse(false, "Такой команды не существует");
+        } else {
+            try {
+                response = command.execute(request.payload(), request.args());
+            } catch (UnsupportedOperationException e) {
+                response = new CommandResponse(false, e.getMessage());
+            }
+        }
 
         // 5) Сериализуем ответ и кладём в очередь на запись
         byte[] respBytes = serializeResponse(response);

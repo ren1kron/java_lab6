@@ -1,11 +1,17 @@
 package com.vera.common.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Класс, представляющий дом
  */
+@Getter
+@NoArgsConstructor
 public class House implements Serializable {
     private String name; //Поле не может быть null
     private long year; //Значение поля должно быть больше 0
@@ -26,18 +32,6 @@ public class House implements Serializable {
         this.name = name;
         this.year = year;
         this.numberOfFlatsOnFloor = numberOfFlatsOnFloor;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public long getYear() {
-        return year;
-    }
-
-    public Integer getNumberOfFlatsOnFloor() {
-        return numberOfFlatsOnFloor;
     }
 
     @Override

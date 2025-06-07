@@ -17,7 +17,7 @@ public class RemoveByIdCommand extends Command {
         if (flat != null || args.length != 1)
             throw new IllegalArgumentException(String.format("Команде '%s' были переданы невалидные аргументы. Введите 'help' для справки.", getName()));
 
-        if (collectionManager.removeById(Long.parseLong(args[1])))
+        if (collectionManager.removeById(Long.parseLong(args[0])))
             return new CommandResponse("Элемент был успешно удалён");
         return new CommandResponse(false, "Не удалось удалить элемент");
     }

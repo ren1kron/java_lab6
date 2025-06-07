@@ -16,14 +16,15 @@ public class SaveCommand extends Command {
 
     @Override
     public CommandResponse execute(Flat flat, String... args) {
-        if (flat != null || args.length != 0) {
-            throw new IllegalArgumentException(String.format("Команде '%s' были переданы невалидные аргументы. Введите 'help' для справки.", getName()));
-        }
-        try {
-            collectionManager.save();
-            return new CommandResponse("Коллекция успешно сохранена!");
-        } catch (IOException e) {
-            return new CommandResponse(false, "Не удалось сохранить коллекцию в файл");
-        }
+        throw new UnsupportedOperationException("Клиент не может сохранять коллекцию. Это доступно только через консоль сервера");
+//        if (flat != null || args.length != 0) {
+//            throw new IllegalArgumentException(String.format("Команде '%s' были переданы невалидные аргументы. Введите 'help' для справки.", getName()));
+//        }
+//        try {
+//            collectionManager.save();
+//            return new CommandResponse("Коллекция успешно сохранена!");
+//        } catch (IOException e) {
+//            return new CommandResponse(false, "Не удалось сохранить коллекцию в файл");
+//        }
     }
 }

@@ -1,6 +1,8 @@
 package com.vera.common.models;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
@@ -11,6 +13,8 @@ import java.util.Objects;
  * Класс, представляющий квартиру
  */
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Flat implements Comparable<Flat>, Serializable {
 
     /**

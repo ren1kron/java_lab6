@@ -21,7 +21,7 @@ public final class Server {
         CommandManager commandManager = new CommandManager(collectionManager);
 
         InetSocketAddress address = new InetSocketAddress(DEFAULT_PORT);
-        new TcpServerManager(address, commandManager).start();
+        new TcpServerManager(address, commandManager, collectionManager).start();
 
 
     }

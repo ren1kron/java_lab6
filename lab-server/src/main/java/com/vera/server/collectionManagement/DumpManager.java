@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.vera.common.models.Flat;
+import lombok.extern.java.Log;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +13,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Level;
 
+@Log
 public class DumpManager {
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -34,6 +37,7 @@ public class DumpManager {
             return mapper.readValue(new File(filePath), new TypeReference<Vector<Flat>>() {
             });
         } catch (IOException e) {
+            log.log(Level.SEVERE, "Ошибка загрузки коллекции из " + filePath, e);
             return new Vector<>();
         }
     }

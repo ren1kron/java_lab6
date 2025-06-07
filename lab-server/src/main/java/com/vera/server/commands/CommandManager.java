@@ -2,6 +2,7 @@ package com.vera.server.commands;
 
 import com.vera.server.collectionManagement.CollectionManager;
 import com.vera.server.commands.elementCommands.AddCommand;
+import com.vera.server.commands.elementCommands.RemoveGreaterCommand;
 import com.vera.server.commands.elementCommands.UpdateCommand;
 import com.vera.server.commands.simpleCommands.*;
 import lombok.Getter;
@@ -22,11 +23,10 @@ public class CommandManager {
         commandMap.put("execute_script", new ExecuteScriptCommand());
         commandMap.put("exit", new ExitCommand());
         commandMap.put("remove_first", new RemoveFirstCommand(collectionManager));
-//        commandMap.put("remove_greater", new RemoveGreaterCommand());
-//        commandMap.put("history", new HistoryCommand());
-//        commandMap.put("sum_of_employees_count", new SumOfEmployeesCountCommand());
-//        commandMap.put("filter_starts_with_full_name", new FilterStartsWithFullNameCommand());
-//        commandMap.put("print_field_ascending_employees_count", new PrintFieldAscendingEmployeesCountCommand());
+        commandMap.put("remove_greater", new RemoveGreaterCommand(collectionManager));
+        commandMap.put("filter_starts_with_name", new FilterStartsWithNameCommand(collectionManager));
+        commandMap.put("print_unique_number_of_rooms", new PrintUniqueNumberOfRoomsCommand(collectionManager));
+        commandMap.put("print_field_descending_view", new PrintFieldDescendingViewCommand(collectionManager));
     }
 
     private final Map<String, Command> commandMap = new LinkedHashMap<>();

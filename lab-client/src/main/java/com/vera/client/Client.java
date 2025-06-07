@@ -2,7 +2,6 @@ package com.vera.client;
 
 import com.vera.client.network.TcpClientManager;
 import com.vera.client.utils.Requester;
-import com.vera.common.cli.BaseCliReader;
 import com.vera.common.cli.CommandLineReader;
 
 public final class Client {
