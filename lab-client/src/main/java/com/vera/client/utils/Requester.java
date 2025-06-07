@@ -34,16 +34,19 @@ public class Requester {
             while ((line = console.readLine()) != null) {
                 String[] tokens = line.trim().split("\\s+");
 
-                if (!tokens[0].isEmpty()) {
-                    CommandResponse response = runCommand(tokens);
-                    if (response.isOk()) {
-                        console.println(response.message());
-                        if (response.data() != null) {
-                            console.println(response.data());
-                        }
-                    } else {
-                        console.printError(response.message());
+                if (tokens.length == 0 || tokens[0].isEmpty())
+                    continue;
+                if (tokens[0].equals("exit"))
+                    break;
+
+                CommandResponse response = runCommand(tokens);
+                if (response.isOk()) {
+                    console.println(response.message());
+                    if (response.data() != null) {
+                        console.println(response.data());
                     }
+                } else {
+                    console.printError(response.message());
                 }
             }
         } catch (ExitException e) {

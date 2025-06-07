@@ -122,7 +122,7 @@ public class TcpServerManager {
 
         Command command = commandManager.getCommand(request.commandName());
 
-        if (request.commandName() == null)
+        if (commandManager.getCommand(request.commandName()) == null)
             response = new CommandResponse(false, "Данная команда не существует");
         else
             response = command.execute(request.payload(), request.args());

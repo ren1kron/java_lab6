@@ -2,9 +2,8 @@ package com.vera.server.commands;
 
 import com.vera.server.collectionManagement.CollectionManager;
 import com.vera.server.commands.elementCommands.AddCommand;
-import com.vera.server.commands.simpleCommands.HelpCommand;
-import com.vera.server.commands.simpleCommands.InfoCommand;
-import com.vera.server.commands.simpleCommands.ShowCommand;
+import com.vera.server.commands.elementCommands.UpdateCommand;
+import com.vera.server.commands.simpleCommands.*;
 import lombok.Getter;
 
 import java.util.*;
@@ -16,13 +15,13 @@ public class CommandManager {
         commandMap.put("info", new InfoCommand(collectionManager));
         commandMap.put("show", new ShowCommand(collectionManager));
         commandMap.put("add", new AddCommand(collectionManager));
-//        commandMap.put("update", new UpdateCommand());
-//        commandMap.put("remove_by_id", new RemoveByIdCommand());
-//        commandMap.put("clear", new ClearCommand());
-//        commandMap.put("save", new SaveCommand());
-//        commandMap.put("execute_script", new ExecuteScriptCommand());
-//        commandMap.put("exit", new ExitCommand());
-//        commandMap.put("remove_at", new RemoveAtCommand());
+        commandMap.put("update", new UpdateCommand(collectionManager));
+        commandMap.put("remove_by_id", new RemoveByIdCommand(collectionManager));
+        commandMap.put("clear", new ClearCommand(collectionManager));
+        commandMap.put("save", new SaveCommand(collectionManager));
+        commandMap.put("execute_script", new ExecuteScriptCommand());
+        commandMap.put("exit", new ExitCommand());
+        commandMap.put("remove_first", new RemoveFirstCommand(collectionManager));
 //        commandMap.put("remove_greater", new RemoveGreaterCommand());
 //        commandMap.put("history", new HistoryCommand());
 //        commandMap.put("sum_of_employees_count", new SumOfEmployeesCountCommand());
