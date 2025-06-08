@@ -11,10 +11,12 @@ import com.vera.common.exceptions.EofException;
 import com.vera.common.exceptions.ExitException;
 import com.vera.common.models.Flat;
 import lombok.SneakyThrows;
+import lombok.extern.java.Log;
 
 import java.io.*;
 import java.util.*;
 
+@Log
 public class Requester {
     private final Set<String> element_commands = Set.of("add", "update", "remove_greater");
     private final int MAX_SCRIPT_DEPTH = 1;
@@ -90,9 +92,11 @@ public class Requester {
                             + MAX_SCRIPT_DEPTH + ")", null);
         }
 
+        // здесь меняем CommandCliReader, который читает из консоли, на BaseLineReader, который читает из файла
+        // но когда мы закончим со скриптом – всё нужно будет вернуть обратно. Поэтому здесь сохраняем старую reader
         var oldConsole = console;
         try {
-
+            // новый reader из файла
             console = new BaseCliReader(new FileInputStream(filename), new MockPrintStream());
             while (true) {
                 String line;
@@ -101,6 +105,7 @@ public class Requester {
                 } catch (EofException eof) {
                     break;
                 }
+                log.info("> " + line);
 
                 String[] tokens = line.trim().split("\\s+");
                 if (tokens.length == 0 || tokens[0].isEmpty()) continue;
@@ -110,6 +115,8 @@ public class Requester {
                         && scriptStack.getOrDefault(tokens[1], 0) >= MAX_SCRIPT_DEPTH) {
                     console.printError("Достигнут предел рекурсии при execute_script '"
                             + tokens[1] + "'");
+                    console.printError("Пропускаем execute_script...");
+
                     continue;
                 }
 
@@ -118,10 +125,10 @@ public class Requester {
                     resp = runCommand(tokens);
                 } catch (ExitException ee) {
                     console.printError("Скрипт принудительно завершён командой exit");
-                    return new CommandResponse(false, "Скрипт прерван.", null);
+                    return new CommandResponse(false, "Скрипт остановлен.");
                 } catch (IOException ioe) {
                     console.printError("Ошибка сети при выполнении скрипта: " + ioe.getMessage());
-                    return new CommandResponse(false, "Прервано из-за сетевой ошибки.", null);
+                    return new CommandResponse(false, "Скрипт прерван из-за сетевой ошибки.");
                 }
 
                 if (resp.isOk()) {
