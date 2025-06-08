@@ -42,9 +42,35 @@ public class Requester {
 
                 CommandResponse response = runCommand(tokens);
                 if (response.isOk()) {
+                    // выводим сообщение
                     console.println(response.message());
+
+                    // красиво выводим коллекцию
                     if (response.data() != null) {
-                        console.println(response.data());
+                        StringBuilder sb = new StringBuilder();
+                        String HEADER_COLOR = "\u001B[34m"; // Синий цвет заголовка
+                        String RESET = "\u001B[0m";  // Сброс цвета
+
+                        sb.append("┌──────────────────────────────────────────────────────────────────┐\n");
+                        sb.append(String.format("│ " + HEADER_COLOR + "%-64s" + RESET + " │%n", "Collection Contents"));
+
+                        for (Flat flat : response.data()) {
+                            sb.append("├──────────────────────────────────────────────────────────────────┤\n");
+                            sb.append(String.format("│ ID: %-60d │%n", flat.getId()));
+                            sb.append(String.format("│ Name: %-58s │%n", flat.getName()));
+                            sb.append(String.format("│ Coordinates: X: %-10d; Y: %-33.2f │%n", flat.getCoordinates().getX(), flat.getCoordinates().getY()));
+                            sb.append(String.format("│ Creation Date: %-49s │%n", flat.getCreationDate()));
+                            sb.append(String.format("│ Area: %-58f │%n", flat.getArea()));
+                            sb.append(String.format("│ Number of Rooms: %-47s │%n", flat.getNumberOfRooms()));
+                            sb.append(String.format("│ Furnish: %-55s │%n", flat.getFurnish()));
+                            sb.append(String.format("│ View: %-58s │%n", flat.getView()));
+                            sb.append(String.format("│ Transport: %-53s │%n", flat.getTransport()));
+                            sb.append(String.format("│ House: %-57s │%n", flat.getHouse()));
+                        }
+
+                        sb.append("└──────────────────────────────────────────────────────────────────┘\n");
+
+                        console.println(sb);
                     }
                 } else {
                     console.printError(response.message());
