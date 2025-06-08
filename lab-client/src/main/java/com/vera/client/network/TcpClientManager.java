@@ -91,7 +91,8 @@ public class TcpClientManager {
             oos.flush();
             body = baos.toByteArray();
         }
-        log.info("[Client] Сериализовали CommandRequest: " + request);
+        log.info("[Client] Сериализовали CommandRequest: ");
+//        log.info("[Client] Сериализовали CommandRequest: " + request);
 
         ByteBuffer buf = ByteBuffer.allocate(Integer.BYTES + body.length);
         buf.putInt(body.length);
@@ -139,7 +140,8 @@ public class TcpClientManager {
                     } catch (ClassNotFoundException e) {
                         throw new IOException("Ошибка десериализации ответа", e);
                     }
-                    log.info("[Client] Получили CommandResponse: " + response);
+//                    log.info("[Client] Получили CommandResponse: " + response);
+                    log.info("[Client] Получили CommandResponse: ");
                     // Готовимся к следующему запросу
                     attach.resetRead();
                     return response;
