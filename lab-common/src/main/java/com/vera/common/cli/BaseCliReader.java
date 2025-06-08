@@ -31,6 +31,7 @@ public class BaseCliReader {
      */
     public String readLine() {
         try {
+            out.print(P1);
             String line = in.readLine();
             if (line == null) {
                 throw new EofException();
