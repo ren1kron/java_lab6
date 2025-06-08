@@ -14,7 +14,7 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 
-@Log
+//@Log
 public class TcpClientManager {
     private static final int MAX_CONNECT_ATTEMPTS = 5;
     private static final long RETRY_DELAY_MS     = 3_000;
@@ -33,7 +33,7 @@ public class TcpClientManager {
     }
 
     public void start() throws IOException {
-        log.info(String.format("[Client] Подключение к %s:%d", host, port));
+//        log.info(String.format("[Client] Подключение к %s:%d", host, port));
 
         int attempts = 0;
         while (true) {
@@ -49,14 +49,14 @@ public class TcpClientManager {
                     Thread.sleep(10);
                 }
 
-                log.info("[Client] Соединение установлено");
+//                log.info("[Client] Соединение установлено");
                 break;  // успешно подключились
 
             } catch (IOException | InterruptedException e) {
-                log.warning(String.format(
-                        "[Client] Попытка %d/%d подключения к %s:%d не удалась: %s",
-                        attempts, MAX_CONNECT_ATTEMPTS, host, port, e.getMessage()
-                ));
+//                log.warning(String.format(
+//                        "[Client] Попытка %d/%d подключения к %s:%d не удалась: %s",
+//                        attempts, MAX_CONNECT_ATTEMPTS, host, port, e.getMessage()
+//                ));
                 // Закрываем неудачный канал
                 if (channel != null && channel.isOpen()) {
                     try { channel.close(); } catch (IOException ignore) {}
@@ -91,7 +91,7 @@ public class TcpClientManager {
             oos.flush();
             body = baos.toByteArray();
         }
-        log.info("[Client] Сериализовали CommandRequest: ");
+//        log.info("[Client] Сериализовали CommandRequest: ");
 //        log.info("[Client] Сериализовали CommandRequest: " + request);
 
         ByteBuffer buf = ByteBuffer.allocate(Integer.BYTES + body.length);
@@ -103,7 +103,7 @@ public class TcpClientManager {
         while (buf.hasRemaining()) {
             channel.write(buf);
         }
-        log.info("[Client] Отправили запрос на сервер");
+//        log.info("[Client] Отправили запрос на сервер");
 
         // 3) Читаем ответ (блокируем до получения полного пакета)
         CommandResponse response;
@@ -122,7 +122,7 @@ public class TcpClientManager {
                             continue;
                         }
                         int len = attach.getBodyLength();
-                        log.info("[Client] Ожидаем " + len + " байт тела от сервера");
+//                        log.info("[Client] Ожидаем " + len + " байт тела от сервера");
                         attach.prepareBodyBuffer(len);
                     }
                     // 3.2) Прочитать тело
@@ -141,7 +141,7 @@ public class TcpClientManager {
                         throw new IOException("Ошибка десериализации ответа", e);
                     }
 //                    log.info("[Client] Получили CommandResponse: " + response);
-                    log.info("[Client] Получили CommandResponse: ");
+//                    log.info("[Client] Получили CommandResponse: ");
                     // Готовимся к следующему запросу
                     attach.resetRead();
                     return response;
@@ -204,7 +204,7 @@ public class TcpClientManager {
     public void close() {
         try { if (channel != null) channel.close(); } catch (IOException ignore) {}
         try { if (selector != null) selector.close(); } catch (IOException ignore) {}
-        log.info("[Client] Ресурсы закрыты");
+//        log.info("[Client] Ресурсы закрыты");
     }
 
 
