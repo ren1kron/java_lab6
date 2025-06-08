@@ -2,9 +2,6 @@ package com.vera.client.utils;
 
 import com.vera.client.network.TcpClientManager;
 import com.vera.common.cli.BaseCliReader;
-import com.vera.common.cli.CommandLineReader;
-import com.vera.common.cli.Console;
-import com.vera.common.cli.MockPrintStream;
 import com.vera.common.dto.CommandRequest;
 import com.vera.common.dto.CommandResponse;
 import com.vera.common.exceptions.EofException;
@@ -19,10 +16,10 @@ import java.util.*;
 @Log
 public class Requester {
     private final Set<String> element_commands = Set.of("add", "update", "remove_greater");
-    private final int MAX_SCRIPT_DEPTH = 1;
+
 
 //    private final List<String> scriptStack = new ArrayList<>();
-    private final Map<String, Integer> scriptStack = new HashMap<>();
+    private final Set<String> runningScripts = new HashSet<>();
     private final TcpClientManager client;
     private BaseCliReader console;
 
@@ -82,24 +79,24 @@ public class Requester {
         return client.sendRequest(new CommandRequest(commandName, argsArray, payload));
     }
 
-    private CommandResponse scriptMode(String filename) {
+    private CommandResponse scriptMode(String fileName) {
         // ограничиваем глубину рекурсии
-        scriptStack.merge(filename, 1, Integer::sum);
-        if (scriptStack.get(filename) > MAX_SCRIPT_DEPTH) {
-            scriptStack.merge(filename, -1, Integer::sum);
-            return new CommandResponse(false,
-                    "Превышен максимально допустимый уровень вложенности скриптов ("
-                            + MAX_SCRIPT_DEPTH + ")", null);
+        if (runningScripts.contains(fileName)) {
+            console.printError("Пропускаем execute_script '" + fileName + "' — рекурсия запрещена");
+            return new CommandResponse(false, "Рекурсия скриптов запрещена", null);
         }
+
+        runningScripts.add(fileName);
 
         // здесь меняем CommandCliReader, который читает из консоли, на BaseLineReader, который читает из файла
         // но когда мы закончим со скриптом – всё нужно будет вернуть обратно. Поэтому здесь сохраняем старую reader
         var oldConsole = console;
         try {
             // новый reader из файла
-            console = new BaseCliReader(new FileInputStream(filename), new MockPrintStream());
+//            console = new BaseCliReader(new FileInputStream(fileName), new MockPrintStream());
+            console = new BaseCliReader(new FileInputStream(fileName), System.out);
+            String line;
             while (true) {
-                String line;
                 try {
                     line = console.readLine();
                 } catch (EofException eof) {
@@ -110,15 +107,15 @@ public class Requester {
                 String[] tokens = line.trim().split("\\s+");
                 if (tokens.length == 0 || tokens[0].isEmpty()) continue;
 
-                // Защита от бесконечной рекурсии
-                if ("execute_script".equals(tokens[0])
-                        && scriptStack.getOrDefault(tokens[1], 0) >= MAX_SCRIPT_DEPTH) {
-                    console.printError("Достигнут предел рекурсии при execute_script '"
-                            + tokens[1] + "'");
-                    console.printError("Пропускаем execute_script...");
-
-                    continue;
-                }
+//                // Защита от бесконечной рекурсии
+//                if ("execute_script".equals(tokens[0])
+//                        && scriptStack.getOrDefault(tokens[1], 0) >= MAX_SCRIPT_DEPTH) {
+//                    console.printError("Достигнут предел рекурсии при execute_script '"
+//                            + tokens[1] + "'");
+//                    console.printError("Пропускаем execute_script...");
+//
+//                    continue;
+//                }
 
                 CommandResponse resp;
                 try {
@@ -142,13 +139,14 @@ public class Requester {
             }
             return new CommandResponse(true, "Скрипт выполнен успешно.", null);
         } catch (FileNotFoundException fnf) {
-            return new CommandResponse(false, "Файл не найден: " + filename, null);
+            return new CommandResponse(false, "Файл не найден: " + fileName, null);
         } finally {
             console = oldConsole;
-            scriptStack.merge(filename, -1, Integer::sum);
-            if (scriptStack.get(filename) <= 0) {
-                scriptStack.remove(filename);
-            }
+            runningScripts.remove(fileName);
+//            scriptStack.merge(fileName, -1, Integer::sum);
+//            if (scriptStack.get(fileName) <= 0) {
+//                scriptStack.remove(fileName);
+//            }
         }
     }
 }
