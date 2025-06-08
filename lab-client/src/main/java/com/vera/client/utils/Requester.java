@@ -52,6 +52,8 @@ public class Requester {
             }
         } catch (ExitException e) {
             console.printError("Закрываем программу...");
+        } catch (EofException e) {
+            console.printError("Вызвано прерывание ctrl+D. Закрываем программу...");
         } finally {
             client.close();
         }
