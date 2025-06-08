@@ -16,6 +16,9 @@ import java.util.Iterator;
 
 @Log
 public class TcpClientManager {
+    private static final int MAX_CONNECT_ATTEMPTS = 5;
+    private static final long RETRY_DELAY_MS     = 3_000;
+
     private final String host;
     private final int port;
 
@@ -29,25 +32,53 @@ public class TcpClientManager {
         this.port = port;
     }
 
-    @SneakyThrows
-    public void start() {
-        log.info(String.format("[Client] Подключение к %s:%d%n", host, port));
+    public void start() throws IOException {
+        log.info(String.format("[Client] Подключение к %s:%d", host, port));
 
-        // 1) Открываем SocketChannel
-        this.channel = SocketChannel.open();
-        channel.configureBlocking(false);
-        channel.connect(new InetSocketAddress(host, port));
+        int attempts = 0;
+        while (true) {
+            attempts++;
+            try {
+                // 1) Открываем и настраиваем канал
+                this.channel = SocketChannel.open();
+                channel.configureBlocking(false);
+                channel.connect(new InetSocketAddress(host, port));
 
-        // 2) Ждём завершения установки соединения
-        while (!channel.finishConnect()) {
-            Thread.sleep(10);
+                // 2) Ждём завершения установки соединения
+                while (!channel.finishConnect()) {
+                    Thread.sleep(10);
+                }
+
+                log.info("[Client] Соединение установлено");
+                break;  // успешно подключились
+
+            } catch (IOException | InterruptedException e) {
+                log.warning(String.format(
+                        "[Client] Попытка %d/%d подключения к %s:%d не удалась: %s",
+                        attempts, MAX_CONNECT_ATTEMPTS, host, port, e.getMessage()
+                ));
+                // Закрываем неудачный канал
+                if (channel != null && channel.isOpen()) {
+                    try { channel.close(); } catch (IOException ignore) {}
+                }
+                if (attempts >= MAX_CONNECT_ATTEMPTS) {
+                    throw new IOException(
+                            "Не удалось подключиться к серверу после "
+                                    + MAX_CONNECT_ATTEMPTS + " попыток", e
+                    );
+                }
+                try {
+                    Thread.sleep(RETRY_DELAY_MS);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("Подключение прервано", ie);
+                }
+            }
         }
-        log.info("[Client] Соединение установлено");
 
-        // 3) Открываем селектор и регистрируем канал для OP_READ (ожидание ответа)
+        // 3) Регистрируем селектор на чтение ответов
         this.selector = Selector.open();
         channel.register(selector, SelectionKey.OP_READ);
-
         this.attach = new ClientAttachment();
     }
 

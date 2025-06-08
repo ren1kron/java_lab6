@@ -4,6 +4,8 @@ import com.vera.client.network.TcpClientManager;
 import com.vera.client.utils.Requester;
 import com.vera.common.cli.CommandLineReader;
 
+import java.io.IOException;
+
 public final class Client {
     private Client() {
         throw new UnsupportedOperationException("This is an utility class and can not be instantiated");
@@ -25,12 +27,14 @@ public final class Client {
             }
         }
 
+        CommandLineReader lineReader = new CommandLineReader(System.in, System.out);
+
         try {
             TcpClientManager tcpClientManager = new TcpClientManager(host, port);
             tcpClientManager.start();
 
-            new Requester(tcpClientManager, new CommandLineReader(System.in, System.out)).interactiveMode();
-        } catch (Exception e) {
-            e.printStackTrace();
+            new Requester(tcpClientManager, lineReader).interactiveMode();
+        } catch (IOException e) {
+            lineReader.printError("Timeout, не удалось подключиться к серверу");
         }
     }}
